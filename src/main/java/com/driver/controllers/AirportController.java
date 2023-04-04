@@ -112,7 +112,7 @@ public class AirportController {
 
         int noOfPeopleWhoHaveAlreadyBooked = bookedSeats.getOrDefault(flightId, 0);
         int fare = 0;
-        if (noOfPeopleWhoHaveAlreadyBooked >= MAX_CAPACITY) {
+        if (noOfPeopleWhoHaveAlreadyBooked == 2) {
             // flight is fully booked, return error fare
             fare = BASE_PRICE + 2 * noOfPeopleWhoHaveAlreadyBooked * PRICE_PER_BOOKING;
         } else {
