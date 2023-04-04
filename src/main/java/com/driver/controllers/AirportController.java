@@ -7,7 +7,10 @@ import com.driver.model.Flight;
 import com.driver.model.Passenger;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 @RestController
 public class AirportController {
@@ -153,19 +156,14 @@ public class AirportController {
         if (!flights.contains(flightId)) {
             return "FAILURE"; // invalid flightId
         }
-
-        List<Integer> passengers = bookings.getOrDefault(flightId, new ArrayList<>());
+        List<Integer> passengers = bookings.
+                getOrDefault(flightId, new ArrayList<>());
         if (!passengers.contains(passengerId)) {
             return "FAILURE"; // passenger has not booked this flight
         }
-
-        boolean passengerRemoved = passengers.remove(passengerId);
-        if (!passengerRemoved) {
-            return "FAILURE"; // passenger was not removed from list
-        }
+        passengers.remove(passengerId);
         bookings.put(flightId, passengers);
         return "SUCCESS";
-
     }
 
 
@@ -210,14 +208,12 @@ public class AirportController {
         //Revenue will also decrease if some passenger cancels the flight
 
 
-        final int BASE_PRICE = 3000;
         if (!flights.contains(flightId)) {
             return -1; // invalid flightId
         }
-
-        List<Integer> passengers = bookings.getOrDefault(flightId, Collections.emptyList());
+        List<Integer> passengers = bookings.getOrDefault(flightId, new ArrayList<>());
         int noOfPassengers = passengers.size();
-        int farePerPassenger = BASE_PRICE + (bookedSeats.getOrDefault(flightId, 0) * 50);
+        int farePerPassenger = calculateFlightFare(flightId);
         return noOfPassengers * farePerPassenger;
 
     }
@@ -231,13 +227,9 @@ public class AirportController {
 
         int newPassengerId = passengers.size() + 1;
         passenger.setPassengerId(newPassengerId);
-        AirportController passengerService = new AirportController();
-        boolean isAdded = Boolean.parseBoolean(passengerService.addPassenger(passenger));
-        if (isAdded) {
-            return "SUCCESS";
-        } else {
-            return "FAILURE";
-        }
+        //Add the passenger to the list of passengers
+        passengers.add(passenger);
+        return "SUCCESS";
 
     }
 
