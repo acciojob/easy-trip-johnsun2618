@@ -110,10 +110,14 @@ public class AirportController {
         final int BASE_PRICE = 3000;
         final int PRICE_PER_BOOKING = 50;
 
-        int noOfPeopleWhoHaveAlreadyBooked = bookedSeats.
-                getOrDefault(flightId, 0);
-        int fare = BASE_PRICE + noOfPeopleWhoHaveAlreadyBooked *
-                PRICE_PER_BOOKING;
+        int noOfPeopleWhoHaveAlreadyBooked = bookedSeats.getOrDefault(flightId, 0);
+        int fare = 0;
+        if (noOfPeopleWhoHaveAlreadyBooked >= MAX_CAPACITY) {
+            // flight is fully booked, return error fare
+            fare = BASE_PRICE + 2 * noOfPeopleWhoHaveAlreadyBooked * PRICE_PER_BOOKING;
+        } else {
+            fare = BASE_PRICE + noOfPeopleWhoHaveAlreadyBooked * PRICE_PER_BOOKING;
+        }
         return fare;
 
     }
@@ -132,15 +136,16 @@ public class AirportController {
         if (!flights.contains(flightId)) {
             return "FAILURE"; // invalid flightId
         }
-        if (bookings.getOrDefault(flightId,
-                new ArrayList<>()).contains(passengerId)) {
+
+        Set<Integer> passengers = bookings.getOrDefault(flightId, new HashSet<>());
+        if (passengers.contains(passengerId)) {
             return "FAILURE"; // passenger has already booked this flight
         }
-        List<Integer> passengers = bookings.
-                getOrDefault(flightId, new ArrayList<>());
+
         if (passengers.size() >= MAX_CAPACITY) {
             return "FAILURE"; // flight is fully booked
         }
+
         passengers.add(passengerId);
         bookings.put(flightId, passengers);
         return "SUCCESS";
@@ -173,7 +178,7 @@ public class AirportController {
         //Tell the count of flight bookings done by a passenger: This will tell the total count of flight bookings done by a passenger :
         return (int) bookings.values().stream()
                 .flatMap(List::stream)
-                .filter(booking -> false)
+                .filter(id -> id.equals(passengerId))
                 .count();
     }
 
