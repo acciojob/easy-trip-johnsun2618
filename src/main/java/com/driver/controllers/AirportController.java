@@ -11,18 +11,31 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 @RestController
 public class AirportController {
+
+
+
+    HashMap<Integer, Airport> airportDb = new HashMap<>();
+    List<Flight> flights = new ArrayList<>();
+    HashMap<Integer, Integer> bookedSeats = new HashMap<>();
+
+    HashMap<Integer, List<Integer>> bookings = new HashMap<>();
+    List<Passenger> passengers = new ArrayList<>();
+
+
+
     @PostMapping("/add_airport")
     public String addAirport(@RequestBody Airport airport){
 
         //Simply add airport details to your database
         //Return a String message "SUCCESS"
 
+        int key = airport.getNoOfTerminals();
+        airportDb.put(key, airport);
         return "SUCCESS";
+
     }
 
     @GetMapping("/get-largest-aiport")
@@ -31,7 +44,20 @@ public class AirportController {
         //Largest airport is in terms of terminals. 3 terminal airport is larger than 2 terminal airport
         //Incase of a tie return the Lexicographically smallest airportName
 
-       return null;
+        String largestAirportName = "";
+        int largestTerminalsCount = 0;
+        for (Airport airport : airportDb.values()) {
+            if (airport.getNoOfTerminals() > largestTerminalsCount) {
+                largestTerminalsCount = airport.getNoOfTerminals();
+                largestAirportName = airport.getAirportName();
+            } else if (airport.getNoOfTerminals() == largestTerminalsCount
+                    && airport.getAirportName().
+                    compareTo(largestAirportName) < 0) {
+                largestAirportName = airport.getAirportName();
+            }
+        }
+        return largestAirportName;
+
     }
 
     @GetMapping("/get-shortest-time-travel-between-cities")
@@ -40,7 +66,19 @@ public class AirportController {
         //Find the duration by finding the shortest flight that connects these 2 cities directly
         //If there is no direct flight between 2 cities return -1.
 
-       return 0;
+        double shortestDuration = -1;
+
+        for (Flight flight : flights) {
+            if (flight.getFromCity() == fromCity && flight.getToCity() == toCity) {
+                if (shortestDuration == -1 || flight.getDuration()
+                        < shortestDuration) {
+                    shortestDuration = flight.getDuration();
+                }
+            }
+        }
+
+       return shortestDuration;
+
     }
 
     @GetMapping("/get-number-of-people-on-airport-on/{date}")
@@ -49,7 +87,15 @@ public class AirportController {
         //Calculate the total number of people who have flights on that day on a particular airport
         //This includes both the people who have come for a flight and who have landed on an airport after their flight
 
-        return 0;
+        int totalPeople = 0;
+
+        for (Flight flight : flights) {
+            if (flight.getFlightDate().equals(date)) {
+                totalPeople += flight.getMaxCapacity();
+            }
+        }
+        return totalPeople;
+
     }
 
     @GetMapping("/calculate-fare")
@@ -60,7 +106,10 @@ public class AirportController {
         //Suppose if 2 people have booked the flight already : the price of flight for the third person will be 3000 + 2*50 = 3100
         //This will not include the current person who is trying to book, he might also be just checking price
 
-       return 0;
+        int MAX_CAPACITY = 100;
+        int noOfPeopleWhoHaveAlreadyBooked = bookedSeats.
+                getOrDefault(flightId, 0);
+        return 3000 + noOfPeopleWhoHaveAlreadyBooked * 50;
 
     }
 
@@ -73,7 +122,23 @@ public class AirportController {
         //Also if the passenger has already booked a flight then also return "FAILURE".
         //else if you are able to book a ticket then return "SUCCESS"
 
-        return null;
+        int MAX_CAPACITY = 100;
+
+        if (!flights.contains(flightId)) {
+            return "FAILURE"; // invalid flightId
+        }
+        if (bookings.getOrDefault(flightId,
+                new ArrayList<>()).contains(passengerId)) {
+            return "FAILURE"; // passenger has already booked this flight
+        }
+        List<Integer> passengers = bookings.
+                getOrDefault(flightId, new ArrayList<>());
+        if (passengers.size() >= MAX_CAPACITY) {
+            return "FAILURE"; // flight is fully booked
+        }
+        passengers.add(passengerId);
+        bookings.put(flightId, passengers);
+        return "SUCCESS";
     }
 
     @PutMapping("/cancel-a-ticket")
@@ -82,9 +147,18 @@ public class AirportController {
         //If the passenger has not booked a ticket for that flight or the flightId is invalid or in any other failure case
         // then return a "FAILURE" message
         // Otherwise return a "SUCCESS" message
-        // and also cancel the ticket that passenger had booked earlier on the given flightId
 
-       return null;
+        if (!flights.contains(flightId)) {
+            return "FAILURE"; // invalid flightId
+        }
+        List<Integer> passengers = bookings.
+                getOrDefault(flightId, new ArrayList<>());
+        if (!passengers.contains(passengerId)) {
+            return "FAILURE"; // passenger has not booked this flight
+        }
+        passengers.remove(passengerId);
+        bookings.put(flightId, passengers);
+        return "SUCCESS";
     }
 
 
@@ -92,14 +166,18 @@ public class AirportController {
     public int countOfBookingsDoneByPassengerAllCombined(@PathVariable("passengerId")Integer passengerId){
 
         //Tell the count of flight bookings done by a passenger: This will tell the total count of flight bookings done by a passenger :
-       return 0;
+        return (int) bookings.values().stream()
+                .flatMap(List::stream)
+                .filter(id -> id.equals(passengerId))
+                .count();
     }
 
     @PostMapping("/add-flight")
     public String addFlight(@RequestBody Flight flight){
 
         //Return a "SUCCESS" message string after adding a flight.
-       return null;
+        flights.add(flight);
+        return "SUCCESS";
     }
 
 
@@ -109,7 +187,11 @@ public class AirportController {
         //We need to get the starting airportName from where the flight will be taking off (Hint think of City variable if that can be of some use)
         //return null incase the flightId is invalid or you are not able to find the airportName
 
-        return null;
+        if (!flights.contains(flightId)) {
+            return null; // invalid flightId
+        }
+        return flights.toString();
+
     }
 
 
@@ -121,7 +203,14 @@ public class AirportController {
         //Revenue will also decrease if some passenger cancels the flight
 
 
-        return 0;
+        if (!flights.contains(flightId)) {
+            return -1; // invalid flightId
+        }
+        List<Integer> passengers = bookings.getOrDefault(flightId, new ArrayList<>());
+        int noOfPassengers = passengers.size();
+        int farePerPassenger = calculateFlightFare(flightId);
+        return noOfPassengers * farePerPassenger;
+
     }
 
 
@@ -131,7 +220,12 @@ public class AirportController {
         //Add a passenger to the database
         //And return a "SUCCESS" message if the passenger has been added successfully.
 
-       return null;
+        int newPassengerId = passengers.size() + 1;
+        passenger.setPassengerId(newPassengerId);
+        //Add the passenger to the list of passengers
+        passengers.add(passenger);
+        return "SUCCESS";
+
     }
 
 
