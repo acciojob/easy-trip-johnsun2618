@@ -106,10 +106,15 @@ public class AirportController {
         //Suppose if 2 people have booked the flight already : the price of flight for the third person will be 3000 + 2*50 = 3100
         //This will not include the current person who is trying to book, he might also be just checking price
 
-        int MAX_CAPACITY = 100;
+        final int MAX_CAPACITY = 100;
+        final int BASE_PRICE = 3000;
+        final int PRICE_PER_BOOKING = 50;
+
         int noOfPeopleWhoHaveAlreadyBooked = bookedSeats.
                 getOrDefault(flightId, 0);
-        return 3000 + noOfPeopleWhoHaveAlreadyBooked * 50;
+        int fare = BASE_PRICE + noOfPeopleWhoHaveAlreadyBooked *
+                PRICE_PER_BOOKING;
+        return fare;
 
     }
 
