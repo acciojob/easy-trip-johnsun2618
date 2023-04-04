@@ -132,16 +132,15 @@ public class AirportController {
         if (!flights.contains(flightId)) {
             return "FAILURE"; // invalid flightId
         }
-
-        Set<Integer> passengers = bookings.getOrDefault(flightId, new HashSet<>());
-        if (passengers.contains(passengerId)) {
+        if (bookings.getOrDefault(flightId,
+                new ArrayList<>()).contains(passengerId)) {
             return "FAILURE"; // passenger has already booked this flight
         }
-
+        List<Integer> passengers = bookings.
+                getOrDefault(flightId, new ArrayList<>());
         if (passengers.size() >= MAX_CAPACITY) {
             return "FAILURE"; // flight is fully booked
         }
-
         passengers.add(passengerId);
         bookings.put(flightId, passengers);
         return "SUCCESS";
