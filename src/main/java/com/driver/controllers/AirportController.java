@@ -120,7 +120,6 @@ public class AirportController {
 //        int noOfPeopleWhoHaveAlreadyBooked = bookedSeats.getOrDefault(flightId, 0);
 //        int fare = 0;
 //        if (noOfPeopleWhoHaveAlreadyBooked >= MAX_CAPACITY) {
-//            // flight is fully booked, return error fare
 //            fare = BASE_PRICE + 2 * noOfPeopleWhoHaveAlreadyBooked * PRICE_PER_BOOKING;
 //        } else {
 //            fare = BASE_PRICE + noOfPeopleWhoHaveAlreadyBooked * PRICE_PER_BOOKING;
@@ -138,7 +137,7 @@ public class AirportController {
         //Also if the passenger has already booked a flight then also return "FAILURE".
         //else if you are able to book a ticket then return "SUCCESS"
 
-        int MAX_CAPACITY = 100;
+        int maxCapacity = 100;
 
         if (!flights.contains(flightId)) {
             return "FAILURE"; // invalid flightId
@@ -146,15 +145,17 @@ public class AirportController {
         if (bookings.getOrDefault(flightId,
                 new ArrayList<>()).contains(passengerId)) {
             return "FAILURE"; // passenger has already booked this flight
-        }
-        List<Integer> passengers = bookings.
-                getOrDefault(flightId, new ArrayList<>());
-        if (passengers.size() >= MAX_CAPACITY) {
+        } else if(passengers.size() >= maxCapacity) {
             return "FAILURE"; // flight is fully booked
+        } else{
+            return "SUCCESS";
         }
-        passengers.add(passengerId);
-        bookings.put(flightId, passengers);
-        return "SUCCESS";
+//        if (passengers.size() >= maxCapacity) {
+//            return "FAILURE"; // flight is fully booked
+//        }
+//        passengers.add(passengerId);
+//        bookings.put(flightId, passengers);
+//        return "SUCCESS";
     }
 
     @PutMapping("/cancel-a-ticket")
