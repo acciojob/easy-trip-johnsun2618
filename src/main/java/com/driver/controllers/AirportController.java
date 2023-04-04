@@ -110,14 +110,10 @@ public class AirportController {
         final int BASE_PRICE = 3000;
         final int PRICE_PER_BOOKING = 50;
 
-        int noOfPeopleWhoHaveAlreadyBooked = bookedSeats.getOrDefault(flightId, 0);
-        int fare = 0;
-        if (noOfPeopleWhoHaveAlreadyBooked >= MAX_CAPACITY) {
-            // flight is fully booked, return error fare
-            fare = BASE_PRICE + 2 * noOfPeopleWhoHaveAlreadyBooked * PRICE_PER_BOOKING;
-        } else {
-            fare = BASE_PRICE + noOfPeopleWhoHaveAlreadyBooked * PRICE_PER_BOOKING;
-        }
+        int noOfPeopleWhoHaveAlreadyBooked = bookedSeats.
+                getOrDefault(flightId, 0);
+        int fare = BASE_PRICE + noOfPeopleWhoHaveAlreadyBooked *
+                PRICE_PER_BOOKING;
         return fare;
 
     }
