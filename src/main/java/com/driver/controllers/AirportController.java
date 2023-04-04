@@ -130,32 +130,49 @@ public class AirportController {
 
 
     @PostMapping("/book-a-ticket")
-    public String bookATicket(@RequestParam("flightId")Integer flightId,@RequestParam("passengerId")Integer passengerId){
+    public String bookATicket(@RequestParam("flightId")Integer flightId,@RequestParam("passengerId")Integer passengerId) {
 
         //If the numberOfPassengers who have booked the flight is greater than : maxCapacity, in that case :
         //return a String "FAILURE"
         //Also if the passenger has already booked a flight then also return "FAILURE".
         //else if you are able to book a ticket then return "SUCCESS"
 
-        int maxCapacity = 100;
-
-        if (!flights.contains(flightId)) {
-            return "FAILURE"; // invalid flightId
-        }
-        if (bookings.getOrDefault(flightId,
-                new ArrayList<>()).contains(passengerId)) {
-            return "FAILURE"; // passenger has already booked this flight
-        } else if(passengers.size() >= maxCapacity) {
-            return "FAILURE"; // flight is fully booked
-        } else{
-            return "SUCCESS";
-        }
+//        int maxCapacity = 100;
+//
+//        if (!flights.contains(flightId)) {
+//            return "FAILURE"; // invalid flightId
+//        }
+//        if (bookings.getOrDefault(flightId,
+//                new ArrayList<>()).contains(passengerId)) {
+//            return "FAILURE"; // passenger has already booked this flight
+//        }
+//        List<Integer> passengers = bookings.
+//                getOrDefault(flightId, new ArrayList<>());
 //        if (passengers.size() >= maxCapacity) {
 //            return "FAILURE"; // flight is fully booked
 //        }
 //        passengers.add(passengerId);
 //        bookings.put(flightId, passengers);
 //        return "SUCCESS";
+//    }
+
+
+        int maxCapacity = 100;
+
+        if (!flights.contains(flightId)) {
+            return "FAILURE"; // invalid flightId
+        }
+        if (bookings.getOrDefault(flightId, new ArrayList<>()).contains(passengerId)) {
+            return "FAILURE"; // passenger has already booked this flight
+        }
+        List<Integer> passengers = bookings.getOrDefault(flightId, new ArrayList<>());
+        if (passengers.size() >= maxCapacity) {
+            return "FAILURE"; // flight is fully booked
+        }
+        passengers.add(passengerId);
+        bookings.put(flightId, passengers);
+        return "SUCCESS"; // booking successful
+
     }
 
     @PutMapping("/cancel-a-ticket")
