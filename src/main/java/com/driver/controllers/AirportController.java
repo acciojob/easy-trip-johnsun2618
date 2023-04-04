@@ -87,6 +87,10 @@ public class AirportController {
         //Calculate the total number of people who have flights on that day on a particular airport
         //This includes both the people who have come for a flight and who have landed on an airport after their flight
 
+        if (date == null || airportName == null || airportName.isEmpty()) {
+            throw new IllegalArgumentException("Invalid date or airport name.");
+        }
+
         int totalPeople = 0;
 
         for (Flight flight : flights) {
@@ -94,6 +98,7 @@ public class AirportController {
                 totalPeople += flight.getMaxCapacity();
             }
         }
+
         return totalPeople;
 
     }
