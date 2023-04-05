@@ -136,27 +136,7 @@ public class AirportController {
         //return a String "FAILURE"
         //Also if the passenger has already booked a flight then also return "FAILURE".
         //else if you are able to book a ticket then return "SUCCESS"
-
-//        int maxCapacity = 100;
-//
-//        if (!flights.contains(flightId)) {
-//            return "FAILURE"; // invalid flightId
-//        }
-//        if (bookings.getOrDefault(flightId,
-//                new ArrayList<>()).contains(passengerId)) {
-//            return "FAILURE"; // passenger has already booked this flight
-//        }
-//        List<Integer> passengers = bookings.
-//                getOrDefault(flightId, new ArrayList<>());
-//        if (passengers.size() >= maxCapacity) {
-//            return "FAILURE"; // flight is fully booked
-//        }
-//        passengers.add(passengerId);
-//        bookings.put(flightId, passengers);
-//        return "SUCCESS";
-//    }
-
-
+        
         int maxCapacity = 100;
 
         if (!flights.contains(flightId)) {
